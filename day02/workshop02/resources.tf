@@ -22,4 +22,8 @@ resource local_file inventory-yaml {
     })
     filename = "ansible/inventory.yaml"
     file_permission = "0444"
+    provisioner "local-exec" {
+        command = "ansible-playbook -i inventory.yaml playbook.yaml"
+        working_dir = "ansible"
+    }
 }
