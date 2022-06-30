@@ -1,0 +1,76 @@
+- name: Post Deployment Config
+  hosts: all
+  tasks:
+#   - name: apt update cache
+#     apt:
+#       update_cache: yes
+#       force_apt_get: true
+#   - name: Install NginX
+#     apt:
+#       name: nginx
+#       state: latest
+# - name: Install CodeServer
+#   hosts: all
+#   tasks:
+#   - name: Create working directory
+#     file:
+#       path: /tmp/code-server
+#       state: directory
+#   - name: Download CodeServer sources
+#     unarchive:
+#       src: https://github.com/cdr/code-server/releases/download/v3.3.1/code-server-3.3.1-linux-amd64.tar.gz
+#       dest: /tmp/code-server
+#       remote_src: yes
+#   - name: Deploy CodeServer
+#     shell:
+#       cmd: "cp -r code-server-3.3.1-linux-amd64 /usr/lib/code-server"
+#       chdir: /tmp/code-server
+#   - name: Create symlink
+#     file:
+#       src: /usr/lib/code-server/bin/code-server
+#       dest: /usr/bin/code-server
+#       state: link
+#   - name: Create user data directory
+#     file:
+#       path: /var/lib/code-server
+#       state: directory
+#   - name: Copy NginX conf
+#     copy:
+#       src: code-server.conf.j2
+#       dest: /etc/nginx/sites-available/code-server.conf
+#       owner: root
+#       group: root
+#       mode: '0644'
+#   - name: Copy NginX Service
+#     copy:
+#       src: code-server.service.j2
+#       dest: /lib/systemd/system/code-server.service
+#       owner: root
+#       group: root
+#       mode: '0644'
+  - name: Replace placeholder in service file
+    replace:
+      path: /lib/systemd/system/code-server.service
+      regexp: '__SET_THIS__'
+      replace: '"mypassword"'
+  - name: Replace hostname in NginX conf
+    replace:
+      path: /etc/nginx/sites-available/code-server.conf
+      regexp: '__SET_THIS__'
+      replace: 'code-{{ ansible_host }}.nip.io'
+  - name: Create symlink to enable code-server
+    file:
+      src: /etc/nginx/sites-available/code-server.conf
+      dest: /etc/nginx/sites-enabled/code-server.conf
+      state: link
+  - name: Restart nginx
+    systemd:
+      daemon_reload: yes
+      name: nginx
+      state: restarted
+  - name: Restart CodeServer
+    systemd:
+      enabled: yes
+      daemon_reload: yes
+      name: code-server
+      state: restarted
