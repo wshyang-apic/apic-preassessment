@@ -1,8 +1,0 @@
-all:
-  vars:
-    ansible_connection: ssh
-    ansible_user: root
-    ansible_ssh_private_key_file: /home/fred/.ssh/id_rsa
-  hosts:
-    server-1:
-      ansible_host: 188.166.250.23
